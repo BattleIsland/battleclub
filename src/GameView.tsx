@@ -2,6 +2,8 @@ import { MutableRefObject, useContext, useEffect, useRef, useState } from "react
 import { WebsocketClientContext } from "./WebsocketClientContext";
 import { render, setup } from "./RenderEngine";
 import { useAssets } from "./Assets";
+import { useKeyboardClicks } from "./KeysClicked";
+import { useMousePosition } from "./MouseMovement";
 
 export const GameView = () => {
     const canvasRef: MutableRefObject<HTMLCanvasElement | null> = useRef(null);
@@ -18,6 +20,27 @@ export const GameView = () => {
             });
         }
     }, [client, context, assets, assetsLoading]);
+
+    const {keysSelected} = useKeyboardClicks();
+    const {angle} = useMousePosition();
+
+    useEffect(() => {
+        let interval: NodeJS.Timer | null = null;
+        if (client !== null) {
+            interval = setInterval(() => {
+                client.publish({destination: '/app/accept_input', body: JSON.stringify({
+                    keysSelected: keysSelected.current,
+                    angle: angle.current
+                })})
+            }, 5);
+        }
+
+        return () => {
+            if (interval !== null) {
+                clearInterval(interval);
+            }
+        }
+    }, [client]);
 
     useEffect(() => {
         if (canvasRef.current !== null) {
