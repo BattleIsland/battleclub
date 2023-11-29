@@ -1,25 +1,27 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import {Client} from '@stomp/stompjs';
 import logo from './logo.svg';
 import './App.css';
+import { WebsocketClientContext } from './WebsocketClientContext';
+import { GameView } from './GameView';
 
 function App() {
+  const [client, setClient] = useState<Client | null>(null);
+  const [clientReady, setClientReady] = useState(false);
+  useEffect(() => {
+    const newClient = new Client({
+      brokerURL: 'ws://localhost:8080/websocket-endpoint',
+      onConnect: () => {
+        setClientReady(true);
+        setClient(newClient);
+      },
+    });
+    newClient.activate();
+  }, []);
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <WebsocketClientContext.Provider value={{client, ready: clientReady}}>
+      <GameView/>
+    </WebsocketClientContext.Provider>
   );
 }
 
