@@ -1,14 +1,32 @@
-import { useContext, useEffect } from "react";
+import { MutableRefObject, useContext, useEffect, useRef, useState } from "react";
 import { WebsocketClientContext } from "./WebsocketClientContext";
+import { render, setup } from "./RenderEngine";
+import { useAssets } from "./Assets";
 
 export const GameView = () => {
-    const {client, ready} = useContext(WebsocketClientContext);
+    const canvasRef: MutableRefObject<HTMLCanvasElement | null> = useRef(null);
+    const [context, setContext] = useState<CanvasRenderingContext2D | null>(null);
+    const {assets, loading: assetsLoading} = useAssets();
+    const {client} = useContext(WebsocketClientContext);
+
     useEffect(() => {
-        if (ready && client !== null) {
+        if (client !== null && context !== null && !assetsLoading) {
             client.subscribe('/topic/messages', (message) => {
-                console.log(message.body);
+                const gameState = JSON.parse(message.body);
+                setup(context);
+                render(context, gameState, assets);
             });
         }
-    }, [client, ready]);
-    return <></>;
+    }, [client, context, assets, assetsLoading]);
+
+    useEffect(() => {
+        if (canvasRef.current !== null) {
+            const context = canvasRef.current.getContext('2d');
+            setContext(context);
+        } else {
+            // log and show error
+        }
+    }, [])
+
+    return <canvas ref={canvasRef}></canvas>;
 }
