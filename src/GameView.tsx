@@ -9,11 +9,15 @@ export const GameView = () => {
     const canvasRef: MutableRefObject<HTMLCanvasElement | null> = useRef(null);
     const [context, setContext] = useState<CanvasRenderingContext2D | null>(null);
     const {assets, loading: assetsLoading} = useAssets();
-    const {client} = useContext(WebsocketClientContext);
+    const {client, userId} = useContext(WebsocketClientContext);
 
     useEffect(() => {
         if (client !== null && context !== null && !assetsLoading) {
-            client.subscribe('/topic/messages', (message) => {
+            client.publish({
+                destination: '/app/accept_userid',
+                body: JSON.stringify({'userId': userId})
+            });
+            client.subscribe(`/topic/${userId}/messages`, (message) => {
                 const gameState = JSON.parse(message.body);
                 setup(context);
                 render(context, gameState, assets);
