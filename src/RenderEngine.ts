@@ -10,9 +10,13 @@ export const setup = (context: CanvasRenderingContext2D) => {
 
 export const render = (context: CanvasRenderingContext2D, gameState: GameState, assets: Assets) => {
     drawPlayer(context, assets);
-    drawHandUnderGun(context, assets, gameState.thisPlayerState.direction);
-    drawGun(context, assets, gameState.thisPlayerState.direction);
-    drawHandOverGun(context, assets, gameState.thisPlayerState.direction);
+    if (gameState.thisPlayerState.weaponIdx === 1) {
+        drawHandUnderGun(context, assets, gameState.thisPlayerState.direction);
+        drawGun(context, assets, gameState.thisPlayerState.direction);
+        drawHandOverGun(context, assets, gameState.thisPlayerState.direction);
+    } else if (gameState.thisPlayerState.weaponIdx === 2) {
+        drawHandsWithoutGun(context, assets, gameState.thisPlayerState.direction);
+    }
     drawWorld(context, assets, gameState.items, 0, 0);
 };
 

@@ -13,6 +13,7 @@ export type ThisPlayerState = {
     health: number;
     direction: number;
     coordinates: Coordinates;
+    weaponIdx: number;
 }
 
 export type OtherPlayerState = {
