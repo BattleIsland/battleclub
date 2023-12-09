@@ -40,7 +40,7 @@ const ASSETS: Asset[] = [
             'rock': {
                 sx: 3332,
                 sy: 0,
-                sw: 179,
+                sw: 177,
                 sh: 163
             },
             'toilet': {

@@ -30,6 +30,7 @@ export const GameView = () => {
 
     useEffect(() => {
         let interval: NodeJS.Timer | null = null;
+        console.log(keysSelected)
         if (client !== null) {
             interval = setInterval(() => {
                 client.publish({destination: '/app/accept_input', body: JSON.stringify({

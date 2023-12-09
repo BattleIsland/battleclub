@@ -9,16 +9,20 @@ export const setup = (context: CanvasRenderingContext2D) => {
 }
 
 export const render = (context: CanvasRenderingContext2D, gameState: GameState, assets: Assets) => {
-    drawPlayer(context, assets);
-    if (gameState.thisPlayerState.weaponIdx === 1) {
-        drawHandUnderGun(context, assets, gameState.thisPlayerState.direction);
-        drawGun(context, assets, gameState.thisPlayerState.direction);
-        drawHandOverGun(context, assets, gameState.thisPlayerState.direction);
-    } else if (gameState.thisPlayerState.weaponIdx === 2) {
-        drawHandsWithoutGun(context, assets, gameState.thisPlayerState.direction);
-    }
-    drawWorld(context, assets, gameState.items, 0, 0);
+    drawPlayerWithWeapon(context, assets, context.canvas.width / 2, context.canvas.height / 2, gameState.thisPlayerState.direction, gameState.thisPlayerState.weaponIdx);
+    drawWorld(context, assets, gameState, gameState.thisPlayerState.coordinates.x, gameState.thisPlayerState.coordinates.y);
 };
+
+const drawPlayerWithWeapon = (context: CanvasRenderingContext2D, assets: Assets, x: number, y: number, direction: number, weaponIdx: number) => {
+    drawPlayer(context, assets, x, y);
+    if (weaponIdx === 1) {
+        drawHandUnderGun(context, assets, x, y, direction);
+        drawGun(context, assets, x, y, direction);
+        drawHandOverGun(context, assets, x, y, direction);
+    } else if (weaponIdx === 2) {
+        drawHandsWithoutGun(context, assets, x, y, direction)
+    }
+}
 
 
 const drawSprite = (ctx: CanvasRenderingContext2D, assets: Assets, spriteName: string, x: number, y: number) => {
@@ -27,22 +31,23 @@ const drawSprite = (ctx: CanvasRenderingContext2D, assets: Assets, spriteName: s
     ctx.drawImage(asset.image, sprite.sx, sprite.sy, sprite.sw, sprite.sh, x, y, sprite.sw, sprite.sh);
 }
 
-const drawWorld = (ctx: CanvasRenderingContext2D, assets: Assets, items: Item[], offset_x: number, offset_y: number) => {
-    items.forEach((item) => drawSprite(ctx, assets, item.type, item.coords.x-offset_x, item.coords.y-offset_y));
+const drawWorld = (ctx: CanvasRenderingContext2D, assets: Assets, gameState: GameState, player_offset_x: number, player_offset_y: number) => {
+    const offset_x = player_offset_x - ctx.canvas.width / 2;
+    const offset_y = player_offset_y - ctx.canvas.height / 2;
+    gameState.items.forEach((item) => drawSprite(ctx, assets, item.type, item.coords.x-offset_x, item.coords.y-offset_y));
+    gameState.otherPlayerStates.forEach((player) => drawPlayerWithWeapon(ctx, assets, player.coordinates.x - offset_x, player.coordinates.y - offset_y, player.direction, 1));
 }
 
-const drawPlayer = (ctx: CanvasRenderingContext2D, assets: Assets) => {
+const drawPlayer = (ctx: CanvasRenderingContext2D, assets: Assets, x: number, y: number) => {
     ctx.save();
-    ctx.translate(window.innerWidth/2, window.innerHeight/2);
     ctx.translate(-assets['sprites.png'].sprites['player'].sw/2, -assets['sprites.png'].sprites['player'].sh/2)
-    drawSprite(ctx, assets, 'player', 0, 0);
+    drawSprite(ctx, assets, 'player', x, y);
     ctx.restore();
 }
 
-const drawGun = (ctx: CanvasRenderingContext2D, assets: Assets, rotation: number) => {
+const drawGun = (ctx: CanvasRenderingContext2D, assets: Assets, x: number, y: number, rotation: number) => {
     ctx.save();
-    // move to middle
-    ctx.translate(window.innerWidth/2, window.innerHeight/2);
+    ctx.translate(x, y);
     // rotate
     ctx.rotate(rotation*Math.PI/180);
     // offset by width
@@ -53,10 +58,9 @@ const drawGun = (ctx: CanvasRenderingContext2D, assets: Assets, rotation: number
     ctx.restore();
 }
 
-const drawHandUnderGun = (ctx: CanvasRenderingContext2D, assets: Assets, rotation: number) => {
+const drawHandUnderGun = (ctx: CanvasRenderingContext2D, assets: Assets, x: number, y: number, rotation: number) => {
     ctx.save();
-    // move to middle
-    ctx.translate(window.innerWidth/2, window.innerHeight/2);
+    ctx.translate(x, y);
     // rotate
     ctx.rotate(rotation*Math.PI/180);
     // offset by width
@@ -67,10 +71,9 @@ const drawHandUnderGun = (ctx: CanvasRenderingContext2D, assets: Assets, rotatio
     ctx.restore();
 }
 
-const drawHandOverGun = (ctx: CanvasRenderingContext2D, assets: Assets, rotation: number) => {
+const drawHandOverGun = (ctx: CanvasRenderingContext2D, assets: Assets, x: number, y: number, rotation: number) => {
     ctx.save();
-    // move to middle
-    ctx.translate(window.innerWidth/2, window.innerHeight/2);
+    ctx.translate(x, y);
     // rotate
     ctx.rotate(rotation*Math.PI/180);
     // offset by width
@@ -81,10 +84,9 @@ const drawHandOverGun = (ctx: CanvasRenderingContext2D, assets: Assets, rotation
     ctx.restore()
 }
 
-const drawHandsWithoutGun = (ctx: CanvasRenderingContext2D, assets: Assets, rotation: number) => {
+const drawHandsWithoutGun = (ctx: CanvasRenderingContext2D, assets: Assets, x: number, y: number, rotation: number) => {
     ctx.save();
-    // move to middle
-    ctx.translate(window.innerWidth/2, window.innerHeight/2);
+    ctx.translate(x, y);
     // rotate
     ctx.rotate(rotation*Math.PI/180);
     // offset by width
